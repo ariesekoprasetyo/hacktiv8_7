@@ -2,20 +2,20 @@ package models
 
 import "time"
 
-type User struct {
-	ID        uint      `gorm:"primaryKey" json:"id"`
-	Name      string    `json:"name"`
-	Email     string    `json:"email"`
-	Addresses []Address `gorm:"foreignKey:UserID" json:"addresses"`
-	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
-	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updated_at"`
+type Orders struct {
+	OrderId      uint      `gorm:"primaryKey" json:"order_id"`
+	CustomerName string    `json:"customer_name"`
+	Ordered_at   time.Time `gorm:"autoUpdateTime" json:"ordered_at"`
+	Created_at   time.Time `gorm:"autoCreateTime" json:"created_at"`
+	Updated_at   time.Time `gorm:"autoUpdateTime" json:"updated_at"`
 }
 
-type Address struct {
-	ID        uint      `gorm:"primaryKey" json:"id"`
-	UserID    uint      `json:"-"`
-	Street    string    `json:"street"`
-	City      string    `json:"city"`
-	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
-	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updated_at"`
+type Items struct {
+	ItemId      uint      `gorm:"primaryKey" json:"item_id"`
+	ItemCode    string    `json:"item_code"`
+	Description string    `json:"description"`
+	Quantity    int       `json:"quantity"`
+	Order_id    []Orders  `gorm:"foreignKey:OrderId" json:"order_id"`
+	Created_at  time.Time `gorm:"autoCreateTime" json:"created_at"`
+	Updated_at  time.Time `gorm:"autoUpdateTime" json:"updated_at"`
 }

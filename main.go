@@ -40,7 +40,7 @@ func setupDB() {
 }
 
 func autoMigrate() {
-	err := DB.AutoMigrate(&models.User{}, &models.Address{})
+	err := DB.AutoMigrate(&models.Items{}, &models.Orders{})
 	if err != nil {
 		log.Fatal("Error Migrate")
 	} else {
