@@ -2,48 +2,25 @@ package main
 
 import (
 	"fmt"
+	"github.com/ariesekoprasetyo/hacktiv8_7/db"
 	"github.com/ariesekoprasetyo/hacktiv8_7/initializers"
-	"github.com/ariesekoprasetyo/hacktiv8_7/models"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	"github.com/ariesekoprasetyo/hacktiv8_7/router"
 	"log"
+	"net/http"
 	"os"
 )
 
-var DB *gorm.DB
-
 func init() {
 	initializers.LoadEnv()
-	setupDB()
-	autoMigrate()
+	db.SetupDB()
 }
 
 func main() {
-
-}
-func setupDB() {
-	var err error
-	dsn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s",
-		os.Getenv("DB_HOST"),
-		os.Getenv("DB_PORT"),
-		os.Getenv("DB_USER"),
-		os.Getenv("DB_NAME"),
-		os.Getenv("DB_PASSWORD"),
-	)
-
-	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Fatal("Failed To Connect")
-		return
+	s := &http.Server{
+		Addr:    fmt.Sprintf(":%s", os.Getenv("PORT")),
+		Handler: router.InitializeRouter(),
 	}
-	fmt.Println("Database is Connected")
-}
-
-func autoMigrate() {
-	err := DB.AutoMigrate(&models.Items{}, &models.Orders{})
-	if err != nil {
-		log.Fatal("Error Migrate")
-	} else {
-		fmt.Println("Success Migrate")
+	if err := s.ListenAndServe(); err != nil {
+		log.Fatalln(err)
 	}
 }
