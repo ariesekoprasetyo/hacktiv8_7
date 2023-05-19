@@ -2,7 +2,6 @@ package db
 
 import (
 	"fmt"
-	"github.com/ariesekoprasetyo/hacktiv8_7/initializers"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
@@ -12,7 +11,6 @@ import (
 var DB *gorm.DB
 
 func SetupDB() {
-	initializers.LoadEnv()
 	var err error
 	dsn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s",
 		os.Getenv("DB_HOST"),
