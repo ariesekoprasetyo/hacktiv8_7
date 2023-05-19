@@ -1,18 +1,25 @@
 package controllers
 
 import (
-	"github.com/ariesekoprasetyo/hacktiv8_7/datatransfers"
 	"github.com/ariesekoprasetyo/hacktiv8_7/orders"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
 )
 
+type ApiResponse struct {
+	Code          int         `json:"code"`
+	Status        string      `json:"status"`
+	Message       string      `json:"message"`
+	MessageDetail string      `json:"message_detail"`
+	Data          interface{} `json:"data"`
+}
+
 func OrderPost(c *gin.Context) {
 	var err error
-	var orderReq datatransfers.Orders
+	var orderReq orders.Orders
 	if err = c.ShouldBindJSON(&orderReq); err != nil {
-		response := datatransfers.ApiResponse{
+		response := ApiResponse{
 			Code:          http.StatusBadRequest,
 			Status:        "Gagal Bind Json",
 			Message:       "Gagal Menambahkan Order",
@@ -23,7 +30,7 @@ func OrderPost(c *gin.Context) {
 		return
 	}
 	if err = orders.CreateOrder(orderReq); err != nil {
-		response := datatransfers.ApiResponse{
+		response := ApiResponse{
 			Code:          http.StatusBadRequest,
 			Status:        "Gagal",
 			Message:       "Gagal Menambahkan Order",
@@ -33,7 +40,7 @@ func OrderPost(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
-	c.JSON(http.StatusOK, datatransfers.ApiResponse{
+	c.JSON(http.StatusOK, ApiResponse{
 		Code:          http.StatusOK,
 		Status:        "Berhasil",
 		Message:       "Berhasil Menambahkan Order",
@@ -45,7 +52,7 @@ func OrderPost(c *gin.Context) {
 func OrderGetAllData(c *gin.Context) {
 	result, err := orders.GetAllData()
 	if err != nil {
-		response := datatransfers.ApiResponse{
+		response := ApiResponse{
 			Code:          http.StatusBadRequest,
 			Status:        "Gagal",
 			Message:       "Gagal Get All Data Order",
@@ -55,7 +62,7 @@ func OrderGetAllData(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
-	c.JSON(http.StatusOK, datatransfers.ApiResponse{
+	c.JSON(http.StatusOK, ApiResponse{
 		Code:          http.StatusOK,
 		Status:        "Berhasil",
 		Message:       "Berhasil Get All Data Order",
@@ -69,7 +76,7 @@ func OrderGetDataById(c *gin.Context) {
 	num, _ := strconv.ParseUint(id, 10, 64)
 	result, err := orders.GetDataById(uint(num))
 	if err != nil {
-		response := datatransfers.ApiResponse{
+		response := ApiResponse{
 			Code:          http.StatusBadRequest,
 			Status:        "Gagal",
 			Message:       "Gagal Get Data Order By Id",
@@ -79,7 +86,7 @@ func OrderGetDataById(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
-	c.JSON(http.StatusOK, datatransfers.ApiResponse{
+	c.JSON(http.StatusOK, ApiResponse{
 		Code:          http.StatusOK,
 		Status:        "Berhasil",
 		Message:       "Berhasil Get Data By Id",
@@ -89,9 +96,9 @@ func OrderGetDataById(c *gin.Context) {
 }
 
 func OrderUpdate(c *gin.Context) {
-	var orderUpdate datatransfers.OrdersUpdate
+	var orderUpdate orders.OrdersUpdate
 	if err := c.ShouldBindJSON(&orderUpdate); err != nil {
-		response := datatransfers.ApiResponse{
+		response := ApiResponse{
 			Code:          http.StatusBadRequest,
 			Status:        "Gagal Bind Json",
 			Message:       "Gagal Update Order",
@@ -105,7 +112,7 @@ func OrderUpdate(c *gin.Context) {
 	num, _ := strconv.ParseUint(id, 10, 64)
 	result, err := orders.UpdateOrder(uint(num), orderUpdate)
 	if err != nil {
-		response := datatransfers.ApiResponse{
+		response := ApiResponse{
 			Code:          http.StatusBadRequest,
 			Status:        "Gagal",
 			Message:       "Gagal Menambahkan Order",
@@ -115,10 +122,10 @@ func OrderUpdate(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
-	c.JSON(http.StatusOK, datatransfers.ApiResponse{
+	c.JSON(http.StatusOK, ApiResponse{
 		Code:          http.StatusOK,
 		Status:        "Berhasil",
-		Message:       "Berhasil Menambahkan Order",
+		Message:       "Berhasil Update Order",
 		MessageDetail: "",
 		Data:          result,
 	})
@@ -129,7 +136,7 @@ func OrderDelete(c *gin.Context) {
 	num, _ := strconv.ParseUint(id, 10, 64)
 	err := orders.DeleteOrder(uint(num))
 	if err != nil {
-		response := datatransfers.ApiResponse{
+		response := ApiResponse{
 			Code:          http.StatusBadRequest,
 			Status:        "Gagal",
 			Message:       "Gagal Menghapus Order",
@@ -139,7 +146,7 @@ func OrderDelete(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
-	c.JSON(http.StatusOK, datatransfers.ApiResponse{
+	c.JSON(http.StatusOK, ApiResponse{
 		Code:          http.StatusOK,
 		Status:        "Berhasil",
 		Message:       "Berhasil Mehapus Order",

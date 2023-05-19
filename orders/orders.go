@@ -1,17 +1,34 @@
 package orders
 
 import (
-	"github.com/ariesekoprasetyo/hacktiv8_7/datatransfers"
 	"github.com/ariesekoprasetyo/hacktiv8_7/db"
+	"time"
 )
 
-func CreateOrder(req datatransfers.Orders) error {
+type Orders struct {
+	CustomerName string    `json:"customer_name" binding:"required"`
+	OrderedAt    time.Time `json:"ordered_at" binding:"required"`
+	Items        []Items   `json:"items" binding:"required"`
+}
+
+type Items struct {
+	ItemCode    string `json:"item_code" binding:"required"`
+	Description string `json:"description" binding:"required"`
+	Quantity    int    `json:"quantity" binding:"required"`
+}
+
+type OrdersUpdate struct {
+	CustomerName string  `json:"customer_name" binding:"required"`
+	Items        []Items `json:"items" binding:"required"`
+}
+
+func CreateOrder(orderReq Orders) error {
 	postOrder := db.Orders{
-		CustomerName: req.CustomerName,
-		Ordered_at:   req.OrderedAt,
+		CustomerName: orderReq.CustomerName,
+		Ordered_at:   orderReq.OrderedAt,
 		Items:        []db.Items{},
 	}
-	for _, itemReq := range req.Items {
+	for _, itemReq := range orderReq.Items {
 		item := db.Items{
 			ItemCode:    itemReq.ItemCode,
 			Description: itemReq.Description,
@@ -43,17 +60,16 @@ func GetDataById(id uint) (db.Orders, error) {
 	return orderById, nil
 }
 
-func UpdateOrder(orderID uint, req datatransfers.OrdersUpdate) (db.Orders, error) {
-	// Update data orders
+func UpdateOrder(orderID uint, orderReq OrdersUpdate) (db.Orders, error) {
 	order := db.Orders{
-		CustomerName: req.CustomerName,
+		CustomerName: orderReq.CustomerName,
 	}
 
-	if err := db.DB.Model(&order).Where("order_id = ?", orderID).Updates(order).Error; err != nil {
+	if err := db.DB.Debug().Model(&order).Where("order_id = ?", orderID).Updates(order).Error; err != nil {
 		return db.Orders{}, err
 	}
 
-	for _, item := range req.Items {
+	for _, item := range orderReq.Items {
 		itemData := db.Items{
 			ItemCode:    item.ItemCode,
 			Description: item.Description,
