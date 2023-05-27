@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
 func main() {
@@ -17,8 +18,11 @@ func main() {
 	}
 	db.SetupDB()
 	s := &http.Server{
-		Addr:    fmt.Sprintf(":%s", os.Getenv("PORT")),
-		Handler: router.InitializeRouter(),
+		Addr:           fmt.Sprintf(":%s", os.Getenv("PORT")),
+		Handler:        router.InitializeRouter(),
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
 	}
 	if err := s.ListenAndServe(); err != nil {
 		log.Fatalln(err)
