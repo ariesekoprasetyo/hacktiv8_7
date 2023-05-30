@@ -28,14 +28,6 @@ func CreateOrder(orderReq Orders) error {
 		Ordered_at:   orderReq.OrderedAt,
 		Items:        []db.Items{},
 	}
-	for _, itemReq := range orderReq.Items {
-		item := db.Items{
-			ItemCode:    itemReq.ItemCode,
-			Description: itemReq.Description,
-			Quantity:    itemReq.Quantity,
-		}
-		postOrder.Items = append(postOrder.Items, item)
-	}
 	if result := db.DB.Create(&postOrder); result.Error != nil {
 		return result.Error
 	}
