@@ -96,7 +96,7 @@ func OrderGetDataById(c *gin.Context) {
 }
 
 func OrderUpdate(c *gin.Context) {
-	var orderUpdate orders.OrdersUpdate
+	var orderUpdate orders.Update
 	if err := c.ShouldBindJSON(&orderUpdate); err != nil {
 		response := ApiResponse{
 			Code:          http.StatusBadRequest,

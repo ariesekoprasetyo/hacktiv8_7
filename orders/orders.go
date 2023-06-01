@@ -6,9 +6,8 @@ import (
 )
 
 type Orders struct {
-	CustomerName string    `json:"customer_name" binding:"required"`
-	OrderedAt    time.Time `json:"ordered_at" binding:"required"`
-	Items        []Items   `json:"items" binding:"required"`
+	CustomerName string  `json:"customer_name" binding:"required"`
+	Items        []Items `json:"items" binding:"required"`
 }
 
 type Items struct {
@@ -17,7 +16,7 @@ type Items struct {
 	Quantity    int    `json:"quantity" binding:"required"`
 }
 
-type OrdersUpdate struct {
+type Update struct {
 	CustomerName string  `json:"customer_name" binding:"required"`
 	Items        []Items `json:"items" binding:"required"`
 }
@@ -25,8 +24,15 @@ type OrdersUpdate struct {
 func CreateOrder(orderReq Orders) error {
 	postOrder := db.Orders{
 		CustomerName: orderReq.CustomerName,
-		Ordered_at:   orderReq.OrderedAt,
-		Items:        []db.Items{},
+		Ordered_at:   time.Now(),
+	}
+	for _, itemReq := range orderReq.Items {
+		item := db.Items{
+			ItemCode:    itemReq.ItemCode,
+			Description: itemReq.Description,
+			Quantity:    itemReq.Quantity,
+		}
+		postOrder.Items = append(postOrder.Items, item)
 	}
 	if result := db.DB.Create(&postOrder); result.Error != nil {
 		return result.Error
@@ -52,11 +58,11 @@ func GetDataById(id uint) (db.Orders, error) {
 	return orderById, nil
 }
 
-func UpdateOrder(orderID uint, orderReq OrdersUpdate) (db.Orders, error) {
+func UpdateOrder(orderID uint, orderReq Update) (db.Orders, error) {
 	order := db.Orders{
 		CustomerName: orderReq.CustomerName,
 	}
-
+	result, err := GetDataById(orderID)
 	if err := db.DB.Debug().Model(&order).Where("order_id = ?", orderID).Updates(order).Error; err != nil {
 		return db.Orders{}, err
 	}
@@ -72,7 +78,6 @@ func UpdateOrder(orderID uint, orderReq OrdersUpdate) (db.Orders, error) {
 			return db.Orders{}, nil
 		}
 	}
-	result, err := GetDataById(orderID)
 	return result, err
 }
 
