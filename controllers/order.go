@@ -17,7 +17,7 @@ type ApiResponse struct {
 
 func OrderPost(c *gin.Context) {
 	var err error
-	var orderReq orders.Orders
+	var orderReq orders.OrdersReq
 	if err = c.ShouldBindJSON(&orderReq); err != nil {
 		response := ApiResponse{
 			Code:          http.StatusBadRequest,
@@ -96,7 +96,7 @@ func OrderGetDataById(c *gin.Context) {
 }
 
 func OrderUpdate(c *gin.Context) {
-	var orderUpdate orders.Update
+	var orderUpdate orders.UpdateReq
 	if err := c.ShouldBindJSON(&orderUpdate); err != nil {
 		response := ApiResponse{
 			Code:          http.StatusBadRequest,
@@ -115,7 +115,7 @@ func OrderUpdate(c *gin.Context) {
 		response := ApiResponse{
 			Code:          http.StatusBadRequest,
 			Status:        "Gagal",
-			Message:       "Gagal Menambahkan Order",
+			Message:       "Gagal Update Order",
 			MessageDetail: err.Error(),
 			Data:          nil,
 		}

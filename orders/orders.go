@@ -2,31 +2,32 @@ package orders
 
 import (
 	"github.com/ariesekoprasetyo/hacktiv8_7/db"
+	"log"
 	"time"
 )
 
-type Orders struct {
-	CustomerName string  `json:"customer_name" binding:"required"`
-	Items        []Items `json:"items" binding:"required"`
+type OrdersReq struct {
+	CustomerName string     `json:"customer_name" binding:"required"`
+	Items        []ItemsReq `json:"items" binding:"required"`
 }
 
-type Items struct {
+type ItemsReq struct {
 	ItemCode    string `json:"item_code" binding:"required"`
 	Description string `json:"description" binding:"required"`
 	Quantity    int    `json:"quantity" binding:"required"`
 }
 
-type Update struct {
-	CustomerName string  `json:"customer_name" binding:"required"`
-	Items        []Items `json:"items" binding:"required"`
+type UpdateReq struct {
+	CustomerName string     `json:"customer_name" binding:"required"`
+	Items        []ItemsReq `json:"items" binding:"required"`
 }
 
-func CreateOrder(orderReq Orders) error {
+func CreateOrder(body OrdersReq) error {
 	postOrder := db.Orders{
-		CustomerName: orderReq.CustomerName,
+		CustomerName: body.CustomerName,
 		Ordered_at:   time.Now(),
 	}
-	for _, itemReq := range orderReq.Items {
+	for _, itemReq := range body.Items {
 		item := db.Items{
 			ItemCode:    itemReq.ItemCode,
 			Description: itemReq.Description,
@@ -58,31 +59,40 @@ func GetDataById(id uint) (db.Orders, error) {
 	return orderById, nil
 }
 
-func UpdateOrder(orderID uint, orderReq Update) (db.Orders, error) {
+func UpdateOrder(orderID uint, bodyUpdate UpdateReq) (db.Orders, error) {
 	order := db.Orders{
-		CustomerName: orderReq.CustomerName,
+		CustomerName: bodyUpdate.CustomerName,
 	}
-	result, err := GetDataById(orderID)
-	if err := db.DB.Debug().Model(&order).Where("order_id = ?", orderID).Updates(order).Error; err != nil {
+	cekById := db.Orders{OrderId: orderID}
+	cekID := db.DB.Preload("Items").Take(&cekById)
+	if cekID.Error != nil {
+		return db.Orders{}, cekID.Error
+	}
+
+	if err := db.DB.Model(&order).Where("order_id = ?", orderID).Updates(order).Error; err != nil {
 		return db.Orders{}, err
 	}
 
-	for _, item := range orderReq.Items {
-		itemData := db.Items{
-			ItemCode:    item.ItemCode,
-			Description: item.Description,
-			Quantity:    item.Quantity,
-		}
-
-		if err := db.DB.Model(&itemData).Where("order_id = ?", orderID).Updates(itemData).Error; err != nil {
-			return db.Orders{}, nil
+	var items []db.Items
+	if err := db.DB.Find(&items, "order_id = ?", orderID).Error; err != nil {
+		return db.Orders{}, err
+	}
+	for i, bodyRequestItems := range bodyUpdate.Items {
+		if err := db.DB.Model(&db.Items{}).Where("item_id = ?", items[i].ItemId).Updates(bodyRequestItems).Error; err != nil {
+			log.Println(err)
+			return db.Orders{}, err
 		}
 	}
+	result, err := GetDataById(orderID)
 	return result, err
 }
 
-func DeleteOrder(orderID uint) error {
+func DeleteOrder(orderID uint) (err error) {
 
+	_, err = GetDataById(orderID)
+	if err != nil {
+		return err
+	}
 	if err := db.DB.Model(&db.Items{}).Where("order_id = ?", orderID).Delete(db.Items{}).Error; err != nil {
 		return err
 	}
